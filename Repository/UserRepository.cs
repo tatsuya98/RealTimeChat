@@ -1,5 +1,6 @@
 ﻿using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Mvc;
+using RealTimeChat.Data;
 using RealTimeChat.DTO.UserDTOs;
 using RealTimeChat.Interface;
 using RealTimeChat.Models;
@@ -9,11 +10,7 @@ namespace RealTimeChat.Repository
 {
     public class UserRepository : IUserRepository
     {
-        private readonly FirestoreDb _db;
-        public UserRepository()
-        {
-            _db = FirestoreDb.Create("realtimechat-8a931");
-        }
+        private readonly FirestoreDb _db = FirestoreDatabase.CreateFireStoreInstance();
         [HttpPost]
         public async Task<User> CreateUserAsync(CreateUserDTO createUserDTO)
         {
