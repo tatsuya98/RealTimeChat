@@ -9,6 +9,7 @@ namespace RealTimeChat.Mappers
         {
             return new MessageDTO()
             {
+                Id = message.Id,
                 Content = message.Content,
                 CreatedAt = message.CreatedAt,
             };
@@ -18,7 +19,18 @@ namespace RealTimeChat.Mappers
             return new Message()
             {
                 Content = createMessageDTO.Content,
-                Username = createMessageDTO.Username
+                Sender = createMessageDTO.Sender,
+                Recipient = createMessageDTO.Recipient,
+            };
+        }
+
+        public static HistotryMessageDTO ToHistoryMesssageDTOFromCreateMessageDTO(this CreateMessageDTO createMessageDTO)
+        {
+            return new HistotryMessageDTO()
+            {
+                Content = createMessageDTO.Content,
+                Sender = createMessageDTO.Sender,
+                CreatedAt = createMessageDTO.CreatedAt,
             };
         }
     }

@@ -1,5 +1,4 @@
 ﻿using Google.Cloud.Firestore;
-using RealTimeChat.DTO.UserDTOs;
 
 namespace RealTimeChat.Models
 {
@@ -13,6 +12,8 @@ namespace RealTimeChat.Models
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();
         [FirestoreProperty]
-        public string Username { get; set; }
+        public string Sender { get; set; }
+        [FirestoreProperty]
+        public string Recipient { get; set; }
     }
 }

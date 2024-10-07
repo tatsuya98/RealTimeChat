@@ -1,12 +1,13 @@
-﻿using RealTimeChat.DTO.MessageDTOs;
+﻿using Google.Cloud.Firestore;
+using RealTimeChat.DTO.MessageDTOs;
+using RealTimeChat.Utils;
 
 namespace RealTimeChat.Models
 {
+    [FirestoreData]
     public class Conversation
     {
-        public string Id { get; set; } = new Guid().ToString();
-        public string UserId { get; set; }
-        public string OtherUserId { get; set; }
-        public List<StoreMessageIdDTO> MessageIds { get; set; }
+        [FirestoreProperty]
+        public List<HistotryMessageDTO> Messages { get; set; } = new List<HistotryMessageDTO>();
     }
 }

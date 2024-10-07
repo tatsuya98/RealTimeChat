@@ -11,6 +11,10 @@ namespace RealTimeChat.Models
         public string HashedPassword { get; set; }
         [FirestoreProperty]
         public string Salt { get; set; }
+        [FirestoreProperty]
+        public List<Message> Messages { get; set; }
+        [FirestoreProperty]
+        public List<string> ConversationDocumentIds { get; set; }
 
     }
 }
