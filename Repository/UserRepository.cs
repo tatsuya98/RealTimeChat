@@ -4,7 +4,6 @@ using RealTimeChat.Data;
 using RealTimeChat.DTO.UserDTOs;
 using RealTimeChat.Interface;
 using RealTimeChat.Models;
-using RealTimeChat.Utils;
 
 namespace RealTimeChat.Repository
 {
@@ -14,26 +13,25 @@ namespace RealTimeChat.Repository
         [HttpPost]
         public async Task<User> CreateUserAsync(CreateUserDTO createUserDTO)
         {
-            CollectionReference collection = _db.Collection("users");
+            CollectionReference collection = _db.Collection("Users");
             QuerySnapshot querySnapshot = await collection.WhereEqualTo("Username", createUserDTO.Username).GetSnapshotAsync();
-            Console.WriteLine(querySnapshot.Count);
             if (querySnapshot.Count == 1)
-                 throw new InvalidOperationException("username already exists");
- 
+                throw new InvalidOperationException("username already exists");
+
             User user = new();
             (string, string) hashData = Utils.Utils.HashPassword(createUserDTO.Password);
             user.Username = createUserDTO.Username;
             user.HashedPassword = hashData.Item1;
             user.Salt = hashData.Item2;
             await collection.AddAsync(user);
-            return user;
+            return user;    
         }
         [HttpGet]
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            Query collection = _db.Collection("users").WhereEqualTo("Username", username);
+            Query collection = _db.Collection("Users").WhereEqualTo("Username", username);
             QuerySnapshot querySnapshot = await collection.GetSnapshotAsync();
-            if(querySnapshot.Count < 1)
+            if(querySnapshot.Count == 0)
             {
                 return null;
             }
@@ -43,10 +41,11 @@ namespace RealTimeChat.Repository
         [HttpPut]
         public async Task<User?> UpdatePasswordAsync(string username, UpdateUserDTO updateUserDTO)
         {
+
             (string, string) hashData = Utils.Utils.HashPassword(updateUserDTO.Password);
-            Query collection = _db.Collection("users").WhereEqualTo("Username", username);
+            Query collection = _db.Collection("Users").WhereEqualTo("Username", username);
             QuerySnapshot querySnapshot = await collection.GetSnapshotAsync();
-            if (querySnapshot.Count < 1)
+            if (querySnapshot.Count == 0)
             {
                 return null;
             }

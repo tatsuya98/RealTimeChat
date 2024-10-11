@@ -19,7 +19,7 @@ namespace RealTimeChat.Repository
             DocumentSnapshot documentSnapshot = await conversationDocument.GetSnapshotAsync();
             if(!documentSnapshot.Exists)
                 return null;
-            List<HistotryMessageDTO> ConversationHistory = documentSnapshot.GetValue<List<HistotryMessageDTO>>("Messages");
+            List<HistotryMessageDTO> ConversationHistory = documentSnapshot.GetValue<List<HistotryMessageDTO>>("MessageHistory");
             ConversationHistory = ConversationHistory.OrderByDescending(message => message.CreatedAt).ToList();
             return ConversationHistory;
         }
@@ -28,31 +28,38 @@ namespace RealTimeChat.Repository
         public async Task<string> CreateConversationHistory(CreateMessageDTO messageDTO)
         {
             List<HistotryMessageDTO> messageHistoryList = new List<HistotryMessageDTO>();
-            Conversation newMessageHistory = new();
+            DirectMessage newMessageHistory = new DirectMessage();
             HistotryMessageDTO messageToStore = messageDTO.ToHistoryMesssageDTOFromCreateMessageDTO();
-            newMessageHistory.Messages.Add(messageToStore);
+            newMessageHistory.MessageHistory.Add(messageToStore);
             CollectionReference collection = db.Collection("Conversations");
             DocumentReference document = await collection.AddAsync(newMessageHistory);
+            List<string> Usernames = [messageDTO.Sender,  messageDTO.Recipient];
+            Dictionary<string, string> documentInfoToBeStored = new Dictionary<string, string>
+            {
+                {"documentId", document.Id },
+                {"Sender", messageDTO.Sender },
+                {"Recipient", messageDTO.Recipient },
+            };
+             Utils.Utils.StoreDocumentInfoInUser(db, Usernames, documentInfoToBeStored, "ConversationInfo");
             return document.Id;
         }
 
         [HttpPut]
-        public async Task<CreateMessageDTO?> StoreMessageInConversationHistory(string conversationDocumentId, CreateMessageDTO createMessageDTO)
+        public async Task<HistotryMessageDTO?> StoreMessageInConversationHistory(string conversationDocumentId, HistotryMessageDTO messageToAdd)
         {
-            List<string> users = [createMessageDTO.Sender, createMessageDTO.Recipient];
+            
             DocumentReference document = db.Collection("Conversations").Document(conversationDocumentId);
             DocumentSnapshot documentSnapshot = await document.GetSnapshotAsync();
-            HistotryMessageDTO messageToAdd = createMessageDTO.ToHistoryMesssageDTOFromCreateMessageDTO();
             if (!documentSnapshot.Exists)
                 return null;
-            List<HistotryMessageDTO> messageHistory = documentSnapshot.GetValue<List<HistotryMessageDTO>>("Messages");
+            List<HistotryMessageDTO> messageHistory = documentSnapshot.GetValue<List<HistotryMessageDTO>>("MessageHistory");
             messageHistory.Add(messageToAdd);
             Dictionary<FieldPath, object> update = new Dictionary<FieldPath, object>
             {
                  { new FieldPath("Messages"), messageHistory}
             };
             await document.UpdateAsync(update);
-            return createMessageDTO;
+            return messageToAdd;
         }
     }
 }

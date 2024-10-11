@@ -6,15 +6,15 @@ namespace RealTimeChat.Models
     public class User
     {
         [FirestoreProperty]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
         [FirestoreProperty]
-        public string HashedPassword { get; set; }
+        public string HashedPassword { get; set; } = string.Empty;
         [FirestoreProperty]
-        public string Salt { get; set; }
+        public string Salt { get; set; } = string.Empty;
         [FirestoreProperty]
-        public List<Message> Messages { get; set; }
+        public List<Dictionary<string, string>> ConversationInfo { get; set; } = new List<Dictionary<string, string>>();
         [FirestoreProperty]
-        public List<string> ConversationDocumentIds { get; set; }
+        public List <Dictionary<string, string>> GroupChatInfo { get; set;} = new List<Dictionary<string, string>>();
 
     }
 }

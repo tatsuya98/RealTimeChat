@@ -10,6 +10,8 @@ namespace RealTimeChat.Mappers
             return new UserDTO
             {
                 Username = user.Username,
+                ConversationInfo = user.ConversationInfo,
+                GroupChatInfo = user.GroupChatInfo,
             };
         }
     }

@@ -31,9 +31,9 @@ namespace RealTimeChat.Controllers
         }
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> storeMessageInConversationHistory([FromRoute] string id, [FromBody] CreateMessageDTO createMessageDTO)
+        public async Task<IActionResult> storeMessageInConversationHistory([FromRoute] string id, [FromBody] HistotryMessageDTO histotryMessageDTO)
         {
-            CreateMessageDTO? message = await _conversationRepo.StoreMessageInConversationHistory(id, createMessageDTO);
+            HistotryMessageDTO? message = await _conversationRepo.StoreMessageInConversationHistory(id, histotryMessageDTO);
             if(message == null)
                 return NotFound();
             return NoContent();
