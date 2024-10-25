@@ -20,7 +20,7 @@ namespace RealTimeChat.Controllers
         {
             List<HistotryMessageDTO>? conversationHistory = await _conversationRepo.GetConversationHistory(id);
             if(conversationHistory == null)
-                return NotFound();
+                return NotFound("User not found");
             return Ok(conversationHistory);
         }
         [HttpPost]

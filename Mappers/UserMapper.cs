@@ -14,5 +14,14 @@ namespace RealTimeChat.Mappers
                 GroupChatInfo = user.GroupChatInfo,
             };
         }
+
+        public static UserDirectMessageConnectionDTO ToUserDirectMessageDTO(this User user, string connectionId)
+        {
+            return new UserDirectMessageConnectionDTO
+            {
+                Username = user.Username,
+                ConnecctionId = connectionId
+            };
+        }
     }
 }

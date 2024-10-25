@@ -36,7 +36,7 @@ namespace RealTimeChat.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new JsonResult(new { message = ex.Message }));
             }
         }
         [HttpPut]

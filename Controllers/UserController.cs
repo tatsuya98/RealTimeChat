@@ -15,33 +15,40 @@ namespace RealTimeChat.Controllers
         {
             _userRepository = userRepository;
         }
-        [HttpGet]
+        [HttpPost]
         [Route("{username}")]
-        public async Task<IActionResult> GetUserByUserName([FromRoute]string username)
+        public async Task<IActionResult> GetUserByUserName([FromRoute] string username, [FromBody] UserLoginPasswordDTO userPassword)
         {
-            User? userModel = await _userRepository.GetUserByUsernameAsync(username);
-            if(userModel == null) return NotFound();
-            return Ok(userModel.ToUserDto());
+            try
+            {
+                User? userModel = await _userRepository.GetUserByUsernameAsync(username, userPassword);
+                if (userModel == null) return NotFound();
+                return Ok(userModel.ToUserDto());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new JsonResult( new {message =  ex.Message }));
+            }
         }
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO createUserDTO)
         {
             try
             {
-            User? userModel = await _userRepository.CreateUserAsync(createUserDTO);
-            return CreatedAtAction(nameof(CreateUser), userModel.ToUserDto());
+                User? userModel = await _userRepository.CreateUserAsync(createUserDTO);
+                return CreatedAtAction(nameof(CreateUser), userModel.ToUserDto());
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new JsonResult(new { message = ex.Message }));
             }
         }
         [HttpPut]
         [Route("{username}")]
-        public async Task<IActionResult> UpdatePassword([FromRoute]string username, [FromBody] UpdateUserDTO updateUserDTO)
+        public async Task<IActionResult> UpdatePassword([FromRoute] string username, [FromBody] UpdateUserDTO updateUserDTO)
         {
             User? userModel = await _userRepository.UpdatePasswordAsync(username, updateUserDTO);
-            if(userModel == null) return NotFound();
+            if (userModel == null) return NotFound();
             return Ok("password has been updated");
         }
     }

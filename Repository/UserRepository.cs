@@ -5,6 +5,7 @@ using RealTimeChat.DTO.UserDTOs;
 using RealTimeChat.Interface;
 using RealTimeChat.Models;
 
+
 namespace RealTimeChat.Repository
 {
     public class UserRepository : IUserRepository
@@ -24,18 +25,23 @@ namespace RealTimeChat.Repository
             user.HashedPassword = hashData.Item1;
             user.Salt = hashData.Item2;
             await collection.AddAsync(user);
-            return user;    
+            return user;
         }
-        [HttpGet]
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        [HttpPost("{username}")]
+        public async Task<User?> GetUserByUsernameAsync(string username, UserLoginPasswordDTO userPassword)
         {
             Query collection = _db.Collection("Users").WhereEqualTo("Username", username);
             QuerySnapshot querySnapshot = await collection.GetSnapshotAsync();
-            if(querySnapshot.Count == 0)
+            if (querySnapshot.Count == 0)
             {
                 return null;
             }
             User user = querySnapshot[0].ConvertTo<User>();
+            bool isPasswordCorrect = Utils.Utils.VerifyPassword(userPassword.Password, user.HashedPassword);
+            if (!isPasswordCorrect)
+            {
+                throw new Exception("Incorrect Password");
+            }
             return user;
         }
         [HttpPut]
