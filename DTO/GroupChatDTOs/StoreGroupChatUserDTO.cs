@@ -2,7 +2,7 @@
 {
     public class StoreGroupChatUserDTO
     {
-        public string RoomName { get; set; }
-        public string ChatRoomDocumentId { get; set; }
+        public string RoomName { get; set; } = string.Empty;
+        public string ChatRoomDocumentId { get; set; } = string.Empty;
     }
 }

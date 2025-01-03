@@ -5,32 +5,23 @@ namespace RealTimeChat.Mappers
 {
     public static class MessageMapper
     {
-        public static MessageDTO ToMessageDTO(this Message message)
+        public static HistoryMessageDTO ToHistoryMesssageDTOFromMessageDTO(this DirectMessageDTO directMessageDto)
         {
-            return new MessageDTO()
+            return new HistoryMessageDTO()
             {
-                Id = message.Id,
-                Content = message.Content,
-                CreatedAt = message.CreatedAt,
-            };
-        }
-        public static Message ToMessageFromCreateMessageDTO(this CreateMessageDTO createMessageDTO)
-        {
-            return new Message()
-            {
-                Content = createMessageDTO.Content,
-                Sender = createMessageDTO.Sender,
-                Recipient = createMessageDTO.Recipient,
+                Content = directMessageDto.Content,
+                Sender = directMessageDto.Sender,
+                CreatedAt = directMessageDto.CreatedAt,
             };
         }
 
-        public static HistotryMessageDTO ToHistoryMesssageDTOFromCreateMessageDTO(this CreateMessageDTO createMessageDTO)
+        public static SentMessageDTO ToSentMessageDTOFromMessageDTO(this DirectMessageDTO directMessageDto, string documentId)
         {
-            return new HistotryMessageDTO()
+            return new SentMessageDTO()
             {
-                Content = createMessageDTO.Content,
-                Sender = createMessageDTO.Sender,
-                CreatedAt = createMessageDTO.CreatedAt,
+                DocumentId = documentId,
+                Content = directMessageDto.Content,
+                Sender = directMessageDto.Sender                             
             };
         }
     }

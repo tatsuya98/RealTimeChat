@@ -6,7 +6,8 @@ namespace RealTimeChat.Interface
     public interface IUserRepository
     {
         public Task<User> CreateUserAsync(CreateUserDTO createUserDTO);
-        public Task<User?> GetUserByUsernameAsync(string username, UserLoginPasswordDTO userPassword);
+        public Task<UserSearchInfoDTO> GetUserInfoByUsername(string username);
+        public Task<User?> GetUserByUsernameAsync(string username, UserLoginDTO userPassword);
         public Task<User?> UpdatePasswordAsync(string username, UpdateUserDTO updateUserDTO);
     }
 }

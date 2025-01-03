@@ -11,6 +11,20 @@ namespace RealTimeChat.Repository
     public class UserRepository : IUserRepository
     {
         private readonly FirestoreDb _db = FirestoreDatabase.CreateFireStoreInstance();
+        [HttpGet]
+        public async Task<UserSearchInfoDTO> GetUserInfoByUsername(string username)
+        {
+            CollectionReference collection = _db.Collection("Users");
+            QuerySnapshot querySnapshot = await collection.WhereEqualTo("Username", username).GetSnapshotAsync();
+            UserSearchInfoDTO user = new();
+            if (querySnapshot.Count == 1)
+            {
+                DocumentSnapshot documentSnapshot = querySnapshot.First();
+                
+                user.Username = documentSnapshot.GetValue<string>("Username");
+            }
+            return user;
+        }
         [HttpPost]
         public async Task<User> CreateUserAsync(CreateUserDTO createUserDTO)
         {
@@ -28,7 +42,7 @@ namespace RealTimeChat.Repository
             return user;
         }
         [HttpPost("{username}")]
-        public async Task<User?> GetUserByUsernameAsync(string username, UserLoginPasswordDTO userPassword)
+        public async Task<User?> GetUserByUsernameAsync(string username, UserLoginDTO userLoginData)
         {
             Query collection = _db.Collection("Users").WhereEqualTo("Username", username);
             QuerySnapshot querySnapshot = await collection.GetSnapshotAsync();
@@ -36,8 +50,9 @@ namespace RealTimeChat.Repository
             {
                 return null;
             }
+            DocumentSnapshot userDocumentSnapshot = querySnapshot.Documents.First();
             User user = querySnapshot[0].ConvertTo<User>();
-            bool isPasswordCorrect = Utils.Utils.VerifyPassword(userPassword.Password, user.HashedPassword);
+            bool isPasswordCorrect = Utils.Utils.VerifyPassword(userLoginData.Password, user.HashedPassword);
             if (!isPasswordCorrect)
             {
                 throw new Exception("Incorrect Password");
