@@ -15,14 +15,21 @@ namespace RealTimeChat.Controllers
         {
             _userRepository = userRepository;
         }
+        [HttpGet]
+        [Route("{username}")]
+        public async Task<IActionResult> GetUserByUsername([FromRoute] string username)
+        {
+            UserSearchInfoDTO usernameToSend = await _userRepository.GetUserInfoByUsername(username);
+            return Ok(usernameToSend);
+        }
         [HttpPost]
         [Route("{username}")]
-        public async Task<IActionResult> GetUserByUserName([FromRoute] string username, [FromBody] UserLoginPasswordDTO userPassword)
+        public async Task<IActionResult> GetUserLogin([FromRoute] string username, [FromBody] UserLoginDTO userPassword)
         {
             try
             {
                 User? userModel = await _userRepository.GetUserByUsernameAsync(username, userPassword);
-                if (userModel == null) return NotFound();
+                if (userModel == null) return NotFound(new JsonResult(new { message = "User not found" }));
                 return Ok(userModel.ToUserDto());
             }
             catch (Exception ex)
@@ -48,8 +55,8 @@ namespace RealTimeChat.Controllers
         public async Task<IActionResult> UpdatePassword([FromRoute] string username, [FromBody] UpdateUserDTO updateUserDTO)
         {
             User? userModel = await _userRepository.UpdatePasswordAsync(username, updateUserDTO);
-            if (userModel == null) return NotFound();
-            return Ok("password has been updated");
+            if (userModel == null) return NotFound(new JsonResult(new { message = "User not found" }));
+            return Ok(new JsonResult(new { message = "Password has been updated" }));
         }
     }
 }

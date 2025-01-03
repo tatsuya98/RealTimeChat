@@ -1,5 +1,5 @@
-﻿using Google.Cloud.Firestore;
-using RealTimeChat.DTO.MessageDTOs;
+﻿using System.Collections.Concurrent;
+using Google.Cloud.Firestore;
 
 namespace RealTimeChat.Utils
 {
@@ -17,30 +17,127 @@ namespace RealTimeChat.Utils
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
 
-        public async static void StoreDocumentInfoInUser(FirestoreDb db, List<string> usernames, Dictionary<string, string> documentInfo, string fieldName)
+        public static async Task<string> StoreDocumentInfoInUsers(FirestoreDb db, Dictionary<string, Object> documentInfoToBeStored, string fieldName, List<string>? usernames)
         {
             Query query = db.Collection("Users").WhereIn("Username", usernames);
-            QuerySnapshot usersSnapshot = await query.GetSnapshotAsync();
-            foreach (DocumentSnapshot userSnapshot in usersSnapshot)
+            QuerySnapshot usersSnapshots = await query.GetSnapshotAsync();
+            string recipient = usernames![1];
+            foreach (DocumentSnapshot userDocumentSnapshot in usersSnapshots)
             {
-                DocumentReference userDocument = userSnapshot.Reference;
-                List<Dictionary<string, string>> userDocumentInfo = userSnapshot.GetValue<List<Dictionary<string, string>>>(fieldName);
-                userDocumentInfo.Add(documentInfo);
+                DocumentReference userDocument = userDocumentSnapshot.Reference;
+                string username = userDocumentSnapshot.GetValue<string>("Username");
+                if(username == recipient)
+                {
+                    documentInfoToBeStored["Recipient"] = usernames.First();
+                }
+                List<Dictionary<string, Object>> userDocumentInfo = userDocumentSnapshot.GetValue<List<Dictionary<string, Object>>>(fieldName);
+                userDocumentInfo.Add(documentInfoToBeStored);
                 Dictionary<FieldPath, object> update = new Dictionary<FieldPath, object>
                 {
                     {new FieldPath(fieldName), userDocumentInfo }
                 };
                 await userDocument.UpdateAsync(update);
             }
+            return recipient;
         }
 
-        public async static Task<bool> UserExists(FirestoreDb db, List<string> usernames)
+        public static async Task<bool> DocumentIdExistsInUsers(FirestoreDb db, string documentId, List<string> usernames, string fieldname)
         {
             Query query = db.Collection("Users").WhereIn("Username", usernames);
-            QuerySnapshot usersSnapshot = await query.GetSnapshotAsync();
-            if (usersSnapshot.Count == 0)
+            QuerySnapshot querySnapshots = await query.GetSnapshotAsync();
+            List<Dictionary<string, Object>> userDocumentsToCheck = new List<Dictionary<string, Object>>();
+            foreach (DocumentSnapshot userDocumentSnapshot in querySnapshots)
+            {
+                List<Dictionary<string, Object>> userDirectMessageDocuments = userDocumentSnapshot.GetValue<List<Dictionary<string, Object>>>(fieldname);
+                userDocumentsToCheck = userDocumentsToCheck.Concat(userDirectMessageDocuments).ToList();
+            }
+            if(userDocumentsToCheck.Count == 0)
+            {
                 return false;
-            return true;
+            }
+            return userDocumentsToCheck.TrueForAll(doc => doc["DocumentId"].ToString() == documentId);
+        }
+        
+        public static void StoreConnectedUsersId(ConcurrentDictionary<string, string> connectedUsers,string username, string connectionId)
+        {
+            connectedUsers.AddOrUpdate(username, connectionId, (key, oldValue) => connectionId);
+        }
+        public static async  Task<string> IncrementMessagesReceived( FirestoreDb db, string username, string documentId, string documentType)
+        {
+            Query query = db.Collection("Users").WhereEqualTo("Username", username);
+            QuerySnapshot querySnapshot = await query.GetSnapshotAsync();
+            DocumentReference document = querySnapshot[0].Reference;
+            DocumentSnapshot documentSnapshot = await document.GetSnapshotAsync();
+            List<Dictionary<string, Object>> documents = new ();
+            Dictionary<FieldPath, object> update = new Dictionary<FieldPath, object>();
+            if (documentType == "directMessage")
+            {
+                documents = documentSnapshot.GetValue<List<Dictionary<string, Object>>>("DirectMessageDocuments");
+                Dictionary<string, Object> updatedDocument = documents.Find(x => x["DocumentId"].ToString() == documentId);
+                updatedDocument["MessagesReceived"] = int.Parse(updatedDocument["MessagesReceived"].ToString()) + 1;
+                int index = documents.FindIndex((x) => x["DocumentId"].ToString() == documentId);
+                documents[index] = updatedDocument;
+                update = new Dictionary<FieldPath, object>
+                {
+                    {new FieldPath("DirectMessageDocuments"), documents }
+                };
+                
+            }
+            else
+            {
+                documents = documentSnapshot.GetValue<List<Dictionary<string, Object>>>("GroupChatDocuments");
+                Dictionary<string, Object> updatedDocument = documents.Find(x => x["DocumentId"].ToString() == documentId);
+                updatedDocument["MessagesReceived"] = int.Parse(updatedDocument["MessagesReceived"].ToString()) + 1;
+                int index = documents.FindIndex((x) => x["DocumentId"].ToString() == documentId);
+                documents[index] = updatedDocument;
+                update = new Dictionary<FieldPath, object>
+                {
+                    {new FieldPath("GroupChatDocuments"), documents }
+                };
+            }
+
+            
+            await document.UpdateAsync(update);
+            return document.Id;
+        }
+
+        public static async Task<string> ResetMessagesReceived(FirestoreDb db, string username, string documentId, string documentType)
+        {
+            Query query = db.Collection("Users").WhereEqualTo("Username", username);
+            QuerySnapshot querySnapshot = await query.GetSnapshotAsync();
+            DocumentReference document = querySnapshot[0].Reference;
+            DocumentSnapshot documentSnapshot = await document.GetSnapshotAsync();
+            List<Dictionary<string, Object>> documents = new ();
+            Dictionary<FieldPath, object> update = new Dictionary<FieldPath, object>();
+            if (documentType == "directMessage")
+            {
+                documents = documentSnapshot.GetValue<List<Dictionary<string, Object>>>("DirectMessageDocuments");
+                Dictionary<string, Object> updatedDocument = documents.Find(x => x["DocumentId"].ToString() == documentId);
+                updatedDocument["MessagesReceived"] = 0;
+                int index = documents.FindIndex((x) => x["DocumentId"].ToString() == documentId);
+                documents[index] = updatedDocument;
+                update = new Dictionary<FieldPath, object>
+                {
+                    {new FieldPath("DirectMessageDocuments"), documents }
+                };
+                
+            }
+            else
+            {
+                documents = documentSnapshot.GetValue<List<Dictionary<string, Object>>>("GroupChatDocuments");
+                Dictionary<string, Object> updatedDocument = documents.Find(x => x["DocumentId"].ToString() == documentId);
+                updatedDocument["MessagesReceived"] = 0;
+                int index = documents.FindIndex((x) => x["DocumentId"].ToString() == documentId);
+                documents[index] = updatedDocument;
+                update = new Dictionary<FieldPath, object>
+                {
+                    {new FieldPath("GroupChatDocuments"), documents }
+                };
+            }
+
+            
+            await document.UpdateAsync(update);
+            return document.Id;
         }
     }
 }

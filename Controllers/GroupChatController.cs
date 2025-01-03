@@ -9,48 +9,23 @@ namespace RealTimeChat.Controllers
     [ApiController]
     public class GroupChatController : ControllerBase
     {
-        private readonly IChatRoomRepository _repo;
-        public GroupChatController(IChatRoomRepository repo)
+        private readonly IGroupChatRepository _repo;
+        public GroupChatController(IGroupChatRepository repo)
         {
             _repo = repo;
         }
         [HttpGet]
-        [Route("{username}")]
-        public async Task<IActionResult> GetChatRoomsByUsername([FromRoute]  string username)
+        [Route("{documentId}")]
+        public async Task<IActionResult> GetGroupChatMessagesByDocumentId([FromRoute]  string documentId)
         {
-            List<Dictionary<string, string>>? groupChatRooms = await _repo.GetChatRoomsFromUserDocumentAsync(username);
-            if ( groupChatRooms == null)
-            {
-                return NotFound();
-            }
-            return Ok(groupChatRooms);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateChatRoomInFireStore([FromBody] CreateGroupChatDTO createGroupChatDTO)
-        {
-            try
-            {
-                Dictionary<string, string> groupChatInfo = await _repo.CreateChatRoomDocumentAsync(createGroupChatDTO);
-                return CreatedAtAction(nameof(CreateChatRoomInFireStore), groupChatInfo);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new JsonResult(new { message = ex.Message }));
-            }
-        }
-        [HttpPut]
-        [Route("{groupChatId}")]
-        public async Task<IActionResult> UpdateMessageHistory([FromRoute] string groupChatId, [FromBody] HistotryMessageDTO messageToAdd)
-        {
-            await _repo.UpdateChatRoomMessageHistoryAsync(messageToAdd, groupChatId);
-            return NoContent();
+            List<HistoryMessageDTO> groupChatMessages = await _repo.GetGroupChatMessagesFromDocumentAsync(documentId);
+            return Ok(groupChatMessages);
         }
         [HttpDelete]
-        [Route("{groupChatId}")]
-        public async Task<IActionResult> DeleteGroupChatRoom([FromRoute] string groupChatId)
+        [Route("{documentId}")]
+        public async Task<IActionResult> DeleteGroupChatRoom([FromRoute] string documentId)
         {
-            await _repo.DeleteChatRoomAsync(groupChatId);
+            await _repo.DeleteGroupChatAsync(documentId);
             return NoContent();
         }
 

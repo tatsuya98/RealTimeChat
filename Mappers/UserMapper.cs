@@ -10,17 +10,16 @@ namespace RealTimeChat.Mappers
             return new UserDTO
             {
                 Username = user.Username,
-                ConversationInfo = user.ConversationInfo,
-                GroupChatInfo = user.GroupChatInfo,
+                DirectMessageDocuments = user.DirectMessageDocuments,
+                GroupChatDocuments = user.GroupChatDocuments,
             };
         }
 
-        public static UserDirectMessageConnectionDTO ToUserDirectMessageDTO(this User user, string connectionId)
+        public static UserLoginDTO ToUserLoginDTOFromCreateUserDTO(this CreateUserDTO createUserDTO) 
         {
-            return new UserDirectMessageConnectionDTO
+            return new UserLoginDTO
             {
-                Username = user.Username,
-                ConnecctionId = connectionId
+                Password = createUserDTO.Password,
             };
         }
     }

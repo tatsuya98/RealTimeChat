@@ -8,12 +8,12 @@ namespace RealTimeChat.Models
         [FirestoreProperty]
         public string Id { get; set; } = Guid.NewGuid().ToString();
         [FirestoreProperty]
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();
         [FirestoreProperty]
-        public string Sender { get; set; }
+        public string Sender { get; set; } = string.Empty;
         [FirestoreProperty]
-        public string Recipient { get; set; }
+        public string Recipient { get; set; } = string.Empty;
     }
 }

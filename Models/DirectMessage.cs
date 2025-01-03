@@ -7,6 +7,6 @@ namespace RealTimeChat.Models
     public class DirectMessage
     {
         [FirestoreProperty]
-        public List<HistotryMessageDTO> MessageHistory { get; set; } = new List<HistotryMessageDTO>();
+        public List<HistoryMessageDTO> MessageHistory { get; set; } = new List<HistoryMessageDTO>();
     }
 }

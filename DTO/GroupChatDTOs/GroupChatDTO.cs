@@ -2,10 +2,10 @@
 
 namespace RealTimeChat.DTO.GroupChatDTOs
 {
-    public class ChatRoomDTO
+    public class GroupChatDTO
     {
-        public string RoomName { get; set; }
-        public List<string> Users { get; set; }
-        public List<HistotryMessageDTO> MessageHistory { get; set; }
+        public string RoomName { get; set; } = String.Empty;
+        public List<string> UsersToAdd { get; set; } = [];
+        public List<HistoryMessageDTO> Messages { get; set; } = [];
     }
 }
