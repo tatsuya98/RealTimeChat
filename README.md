@@ -18,7 +18,7 @@ visual studio or c# dev kit if using vs code
 ### Installing
 1. fork the project
 2. download the project using git clone
-3. install using npm install you must also do this while in the frontend folder
+3. install using npm install you must also do this for the frontend folder
 
 ### Executing program
  npm run dev when in the front end folder and ctr shift f5 in vs or click the debug icon
