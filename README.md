@@ -1,10 +1,7 @@
 # SwarmNetwork
-
-It's a real time chat app
-
 ## Description
 
-A real time chat web app built using signalR firebase and svelte and bcrypt
+A real time chat web app, with the name based on 2 ais neuro and evil where their community is called the swarm. Built using signalR firebase, svelte and bcrypt
 
 ## Getting Started
 
